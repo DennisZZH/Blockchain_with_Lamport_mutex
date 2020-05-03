@@ -176,32 +176,13 @@ class Msg :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTextFieldNumber = 3,
     kTypeFieldNumber = 1,
     kClockFieldNumber = 2,
-    kSrcFieldNumber = 4,
-    kDstFieldNumber = 5,
+    kPidFieldNumber = 3,
+    kDstFieldNumber = 4,
+    kAmtFieldNumber = 5,
+    kIRFieldNumber = 6,
   };
-  // required string text = 3;
-  bool has_text() const;
-  private:
-  bool _internal_has_text() const;
-  public:
-  void clear_text();
-  const std::string& text() const;
-  void set_text(const std::string& value);
-  void set_text(std::string&& value);
-  void set_text(const char* value);
-  void set_text(const char* value, size_t size);
-  std::string* mutable_text();
-  std::string* release_text();
-  void set_allocated_text(std::string* text);
-  private:
-  const std::string& _internal_text() const;
-  void _internal_set_text(const std::string& value);
-  std::string* _internal_mutable_text();
-  public:
-
   // required uint32 type = 1;
   bool has_type() const;
   private:
@@ -215,7 +196,7 @@ class Msg :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // required uint32 clock = 2;
+  // optional uint32 clock = 2;
   bool has_clock() const;
   private:
   bool _internal_has_clock() const;
@@ -228,20 +209,20 @@ class Msg :
   void _internal_set_clock(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // optional uint32 src = 4;
-  bool has_src() const;
+  // optional uint32 pid = 3;
+  bool has_pid() const;
   private:
-  bool _internal_has_src() const;
+  bool _internal_has_pid() const;
   public:
-  void clear_src();
-  ::PROTOBUF_NAMESPACE_ID::uint32 src() const;
-  void set_src(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  void clear_pid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 pid() const;
+  void set_pid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_src() const;
-  void _internal_set_src(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_pid() const;
+  void _internal_set_pid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // optional uint32 dst = 5;
+  // optional uint32 dst = 4;
   bool has_dst() const;
   private:
   bool _internal_has_dst() const;
@@ -254,21 +235,45 @@ class Msg :
   void _internal_set_dst(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // optional uint32 amt = 5;
+  bool has_amt() const;
+  private:
+  bool _internal_has_amt() const;
+  public:
+  void clear_amt();
+  ::PROTOBUF_NAMESPACE_ID::uint32 amt() const;
+  void set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_amt() const;
+  void _internal_set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 IR = 6;
+  bool has_ir() const;
+  private:
+  bool _internal_has_ir() const;
+  public:
+  void clear_ir();
+  ::PROTOBUF_NAMESPACE_ID::uint32 ir() const;
+  void set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_ir() const;
+  void _internal_set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Msg)
  private:
   class _Internal;
 
-  // helper for ByteSizeLong()
-  size_t RequiredFieldsByteSizeFallback() const;
-
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr text_;
   ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   ::PROTOBUF_NAMESPACE_ID::uint32 clock_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 src_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 pid_;
   ::PROTOBUF_NAMESPACE_ID::uint32 dst_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 amt_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 ir_;
   friend struct ::TableStruct_Msg_2eproto;
 };
 // ===================================================================
@@ -284,7 +289,7 @@ class Msg :
 
 // required uint32 type = 1;
 inline bool Msg::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool Msg::has_type() const {
@@ -292,7 +297,7 @@ inline bool Msg::has_type() const {
 }
 inline void Msg::clear_type() {
   type_ = 0u;
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_type() const {
   return type_;
@@ -302,7 +307,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::type() const {
   return _internal_type();
 }
 inline void Msg::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   type_ = value;
 }
 inline void Msg::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -310,9 +315,9 @@ inline void Msg::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   // @@protoc_insertion_point(field_set:Msg.type)
 }
 
-// required uint32 clock = 2;
+// optional uint32 clock = 2;
 inline bool Msg::_internal_has_clock() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool Msg::has_clock() const {
@@ -320,7 +325,7 @@ inline bool Msg::has_clock() const {
 }
 inline void Msg::clear_clock() {
   clock_ = 0u;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_clock() const {
   return clock_;
@@ -330,7 +335,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::clock() const {
   return _internal_clock();
 }
 inline void Msg::_internal_set_clock(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
   clock_ = value;
 }
 inline void Msg::set_clock(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -338,108 +343,37 @@ inline void Msg::set_clock(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   // @@protoc_insertion_point(field_set:Msg.clock)
 }
 
-// required string text = 3;
-inline bool Msg::_internal_has_text() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+// optional uint32 pid = 3;
+inline bool Msg::_internal_has_pid() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool Msg::has_text() const {
-  return _internal_has_text();
+inline bool Msg::has_pid() const {
+  return _internal_has_pid();
 }
-inline void Msg::clear_text() {
-  text_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  _has_bits_[0] &= ~0x00000001u;
+inline void Msg::clear_pid() {
+  pid_ = 0u;
+  _has_bits_[0] &= ~0x00000004u;
 }
-inline const std::string& Msg::text() const {
-  // @@protoc_insertion_point(field_get:Msg.text)
-  return _internal_text();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_pid() const {
+  return pid_;
 }
-inline void Msg::set_text(const std::string& value) {
-  _internal_set_text(value);
-  // @@protoc_insertion_point(field_set:Msg.text)
+inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::pid() const {
+  // @@protoc_insertion_point(field_get:Msg.pid)
+  return _internal_pid();
 }
-inline std::string* Msg::mutable_text() {
-  // @@protoc_insertion_point(field_mutable:Msg.text)
-  return _internal_mutable_text();
+inline void Msg::_internal_set_pid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  pid_ = value;
 }
-inline const std::string& Msg::_internal_text() const {
-  return text_.GetNoArena();
-}
-inline void Msg::_internal_set_text(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  text_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
-}
-inline void Msg::set_text(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  text_.SetNoArena(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:Msg.text)
-}
-inline void Msg::set_text(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  text_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Msg.text)
-}
-inline void Msg::set_text(const char* value, size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  text_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Msg.text)
-}
-inline std::string* Msg::_internal_mutable_text() {
-  _has_bits_[0] |= 0x00000001u;
-  return text_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline std::string* Msg::release_text() {
-  // @@protoc_insertion_point(field_release:Msg.text)
-  if (!_internal_has_text()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return text_.ReleaseNonDefaultNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline void Msg::set_allocated_text(std::string* text) {
-  if (text != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  text_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), text);
-  // @@protoc_insertion_point(field_set_allocated:Msg.text)
+inline void Msg::set_pid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_pid(value);
+  // @@protoc_insertion_point(field_set:Msg.pid)
 }
 
-// optional uint32 src = 4;
-inline bool Msg::_internal_has_src() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool Msg::has_src() const {
-  return _internal_has_src();
-}
-inline void Msg::clear_src() {
-  src_ = 0u;
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_src() const {
-  return src_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::src() const {
-  // @@protoc_insertion_point(field_get:Msg.src)
-  return _internal_src();
-}
-inline void Msg::_internal_set_src(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000008u;
-  src_ = value;
-}
-inline void Msg::set_src(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_src(value);
-  // @@protoc_insertion_point(field_set:Msg.src)
-}
-
-// optional uint32 dst = 5;
+// optional uint32 dst = 4;
 inline bool Msg::_internal_has_dst() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool Msg::has_dst() const {
@@ -447,7 +381,7 @@ inline bool Msg::has_dst() const {
 }
 inline void Msg::clear_dst() {
   dst_ = 0u;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_dst() const {
   return dst_;
@@ -457,12 +391,68 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::dst() const {
   return _internal_dst();
 }
 inline void Msg::_internal_set_dst(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000008u;
   dst_ = value;
 }
 inline void Msg::set_dst(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_dst(value);
   // @@protoc_insertion_point(field_set:Msg.dst)
+}
+
+// optional uint32 amt = 5;
+inline bool Msg::_internal_has_amt() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool Msg::has_amt() const {
+  return _internal_has_amt();
+}
+inline void Msg::clear_amt() {
+  amt_ = 0u;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_amt() const {
+  return amt_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::amt() const {
+  // @@protoc_insertion_point(field_get:Msg.amt)
+  return _internal_amt();
+}
+inline void Msg::_internal_set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  amt_ = value;
+}
+inline void Msg::set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_amt(value);
+  // @@protoc_insertion_point(field_set:Msg.amt)
+}
+
+// optional uint32 IR = 6;
+inline bool Msg::_internal_has_ir() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool Msg::has_ir() const {
+  return _internal_has_ir();
+}
+inline void Msg::clear_ir() {
+  ir_ = 0u;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_ir() const {
+  return ir_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::ir() const {
+  // @@protoc_insertion_point(field_get:Msg.IR)
+  return _internal_ir();
+}
+inline void Msg::_internal_set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  ir_ = value;
+}
+inline void Msg::set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_ir(value);
+  // @@protoc_insertion_point(field_set:Msg.IR)
 }
 
 #ifdef __GNUC__
