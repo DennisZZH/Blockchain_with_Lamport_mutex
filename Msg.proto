@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+message Msg{
+	required uint32 type = 1;
+	required uint32 clock = 2;
+	required string text = 3;
+	optional uint32 src = 4;
+    optional uint32 dst = 5;
+}
