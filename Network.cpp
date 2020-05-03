@@ -50,47 +50,48 @@ void *manageProcesses(void* args) {
         Msg m;
         m.ParseFromString(strMessage);
 
-        // Close the socket if type == 0
-        if (m.type() == 3) {
-            std::cout << "Process " << procNum + 1 << " exits.\n";
-            quit = true;
-        }
-
-        else {
-            // Determine the dst socket
-            int send_socket;
-            if (m.dst() == 1) {
-                send_socket = argu->sockfd[0];
-            }
-            else if (m.dst() == 2) {
-                send_socket = argu->sockfd[1];
-            }
-            else if (m.dst() == 3) {
-                send_socket = argu->sockfd[2];
-            }
-
-            m.set_type(2);
-            strMessage = m.SerializeAsString();
-
+        // Reply message?
+        if (m.type() == 2) {
+            std::cout << "Wait and send REPLY from P" << procNum << " to P" << m.dst() << "\n";
+            // Sleep for 1 second
+            sleep(1);
             // Send the message
             int send_size = 0;
-            std::cout << "Waiting to send the message from " << m.src() << " to " << m.dst() << "......"<<std::endl;
-            
-            r = rand() % 5 + 1;
-            gettimeofday(&start, NULL);
-            while(true){
-                gettimeofday(&end, NULL);
-                long seconds = (end.tv_sec - start.tv_sec);
-                if(seconds >= r) break;
-                //std::cout<<"seconds = "<<seconds<<std::endl;
-            }
-        
-
-            if ((send_size = send(send_socket, strMessage.c_str(), sizeof(Msg), 0)) < 0) {
-                std::cerr << "Failed\n";
+            if ((send_size = send(argu->sockfd[m.dst() - 1], strMessage.c_str(), sizeof(Msg), 0)) < 0) {
+                std::cerr << "Failed.\n";
                 exit(0);
             }
-            std::cout << "Done!\n";
+            std::cout << "Done.\n";
+        }
+
+        // Close the socket
+        else if (m.type() == 5) {
+            std::cout << "P" << procNum << " exits.\n";
+            break;
+        }
+
+        else { // Other message. Send to all other processes
+            // Determine the dst socket
+            std::string messageType;
+            if (m.type() == 1) messageType = "REQUEST";
+            else if (m.type() == 3) messageType = "BROADCAST";
+            else if (m.type() == 4) messageType = "RELEASE";
+            std::cout << "Wait and send " << messageType << " from P" << procNum << "\n";
+
+            // Broadcast the message
+            for (int i = 0; i < 3; i++) {
+                if (procNum == (i + 1)) {
+                    // Don't broadcast to itself
+                    continue;
+                }
+                // Send the message to other processes
+                int send_size = 0;
+                if ((send_size = send(argu->sockfd[i], strMessage.c_str(), sizeof(Msg), 0)) < 0) {
+                    std::cerr << "Failed sending the message to P" << i + 1 << std::endl;
+                    exit(0);
+                }
+            }
+            std::cout << "Done.\n";
         }
     }
     close(cur_sockfd);
