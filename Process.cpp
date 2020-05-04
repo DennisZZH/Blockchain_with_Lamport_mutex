@@ -208,7 +208,7 @@ void *procThread(void* arg) {
                         }
 
                         // revoke main thread
-                        // pthread_cond_signal(&cond);
+                        pthread_cond_signal(&cond);
 
                     }
                     num_reply = 0;
@@ -266,7 +266,7 @@ void *procThread(void* arg) {
                         }
 
                          // revoke main thread
-                         //pthread_cond_signal(&cond);
+                         pthread_cond_signal(&cond);
 
                     }
 
@@ -379,7 +379,7 @@ int main() {
         else if(input == 0){
 
             // Allow one transfer-release at a time
-            // pthread_mutex_lock(&transfer_lock);
+            pthread_mutex_lock(&transfer_lock);
 
             std::cout<<"Input recipient PID: ";
             std::cin>>rid;
@@ -403,8 +403,10 @@ int main() {
             m.Clear();
 
             // conditional wait for signal from release
-            // pthread_cond_wait(&cond, &transfer_lock);
-            // pthread_mutex_unlock(&transfer_lock);
+            std::cout<<"Waiting for last transaction to complete...";
+            pthread_cond_wait(&cond, &transfer_lock);
+            std::cout<<"Last transaction complete!"<<std::endl;
+            pthread_mutex_unlock(&transfer_lock);
         }
 
         else{
