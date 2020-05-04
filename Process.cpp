@@ -129,7 +129,7 @@ void *procThread(void* arg) {
 
             if(m.type() == 0){      // Transfer
 
-                std::cout<<"Recving a Local Transfer"<<std::endl;
+                //std::cout<<"Recving a Local Transfer"<<std::endl;
                
                 if(balance >= m.amt()){
                 
@@ -153,7 +153,7 @@ void *procThread(void* arg) {
         
             else if(m.type() == 1){     // Request
 
-                std::cout<<"Recving a Request from p"<<m.pid()<<std::endl;
+                //std::cout<<"Recving a Request from p"<<m.pid()<<std::endl;
                 
                 priority_push(m);
 
@@ -171,7 +171,7 @@ void *procThread(void* arg) {
 
             else if(m.type() == 2){     // Reply
 
-                std::cout<<"Recving a Reply"<<std::endl;
+                //std::cout<<"Recving a Reply"<<std::endl;
 
                 if(++num_reply < 2){
                   
@@ -189,7 +189,7 @@ void *procThread(void* arg) {
                         n.set_dst(temp.dst());
                         n.set_amt(temp.amt());
 
-                        std::cout<<"111 adding transaction!"<<std::endl;
+                        //std::cout<<"111 adding transaction!"<<std::endl;
                         blockchain.push_back(n);
 
                         n.SerializeToString(&msg_str);
@@ -209,15 +209,18 @@ void *procThread(void* arg) {
                             exit(0);
                         }
 
+                        // revoke main thread
+                        // STUB
+
                     }
                     num_reply = 0;
                 }
             }
 
             else if(m.type() == 3){     // Broadcast
-            std::cout<<"Recving a Broadcast from p"<<m.pid()<<std::endl;
+            //std::cout<<"Recving a Broadcast from p"<<m.pid()<<std::endl;
 
-              std::cout<<"222 adding transaction!"<<std::endl;
+              //std::cout<<"222 adding transaction!"<<std::endl;
 
                 blockchain.push_back(m);
                 if(mypid == m.dst()){
@@ -227,7 +230,7 @@ void *procThread(void* arg) {
 
             else if(m.type() == 4){     // Release
 
-                std::cout<<"Recving a Release"<<std::endl;
+                //std::cout<<"Recving a Release"<<std::endl;
 
                 requests.pop_front();
 
@@ -247,7 +250,7 @@ void *procThread(void* arg) {
                         n.set_dst(temp.dst());
                         n.set_amt(temp.amt());
 
-                        std::cout<<"333 adding transaction!"<<std::endl;
+                        //std::cout<<"333 adding transaction!"<<std::endl;
                         blockchain.push_back(n);
 
                         n.SerializeToString(&msg_str);
@@ -266,6 +269,10 @@ void *procThread(void* arg) {
                             std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                             exit(0);
                         }
+
+                         // revoke main thread
+                         // STUB
+
                     }
 
                 }
@@ -378,6 +385,12 @@ int main() {
             std::cout<<"Input transfer amount: ";
             std::cin>>amt;
 
+            if(amt > balance){
+                std::cout<<"FAILURE: insufficient balance!"<<std::endl;
+                safe_increment(1);
+                continue;
+            }
+
             m.set_type(0);
             m.set_dst(rid);
             m.set_amt(amt);
@@ -386,6 +399,9 @@ int main() {
             safe_increment(1);
 
             m.Clear();
+
+            // conditional wait for signal from release
+            // STUB
         }
 
         else{
