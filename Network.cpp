@@ -52,7 +52,7 @@ void *manageProcesses(void* args) {
 
         // Reply message?
         if (m.type() == 2) {
-            std::cout << "Wait and send REPLY from P" << procNum << " to P" << m.dst() << "\n";
+            std::cout << "Wait and send REPLY from P" << procNum + 1<< " to P" << m.dst() << "\n";
             // Sleep for 1 second
             sleep(1);
             // Send the message
@@ -66,7 +66,7 @@ void *manageProcesses(void* args) {
 
         // Close the socket
         else if (m.type() == 5) {
-            std::cout << "P" << procNum << " exits.\n";
+            std::cout << "P" << procNum + 1 << " exits.\n";
             break;
         }
 
@@ -76,7 +76,7 @@ void *manageProcesses(void* args) {
             if (m.type() == 1) messageType = "REQUEST";
             else if (m.type() == 3) messageType = "BROADCAST";
             else if (m.type() == 4) messageType = "RELEASE";
-            std::cout << "Wait and send " << messageType << " from P" << procNum << "\n";
+            std::cout << "Wait and send " << messageType << " from P" << procNum + 1<< "\n";
 
             sleep(1);
 
