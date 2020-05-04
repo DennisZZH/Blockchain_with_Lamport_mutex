@@ -47,16 +47,14 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Msg_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::Msg, pid_),
   PROTOBUF_FIELD_OFFSET(::Msg, dst_),
   PROTOBUF_FIELD_OFFSET(::Msg, amt_),
-  PROTOBUF_FIELD_OFFSET(::Msg, ir_),
   0,
   1,
   2,
   3,
   4,
-  5,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 11, sizeof(::Msg)},
+  { 0, 10, sizeof(::Msg)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -64,9 +62,9 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_Msg_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\tMsg.proto\"U\n\003Msg\022\014\n\004type\030\001 \002(\r\022\r\n\005cloc"
+  "\n\tMsg.proto\"I\n\003Msg\022\014\n\004type\030\001 \002(\r\022\r\n\005cloc"
   "k\030\002 \001(\r\022\013\n\003pid\030\003 \001(\r\022\013\n\003dst\030\004 \001(\r\022\013\n\003amt"
-  "\030\005 \001(\r\022\n\n\002IR\030\006 \001(\r"
+  "\030\005 \001(\r"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_Msg_2eproto_deps[1] = {
 };
@@ -76,7 +74,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_Msg
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_Msg_2eproto_once;
 static bool descriptor_table_Msg_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_Msg_2eproto = {
-  &descriptor_table_Msg_2eproto_initialized, descriptor_table_protodef_Msg_2eproto, "Msg.proto", 98,
+  &descriptor_table_Msg_2eproto_initialized, descriptor_table_protodef_Msg_2eproto, "Msg.proto", 86,
   &descriptor_table_Msg_2eproto_once, descriptor_table_Msg_2eproto_sccs, descriptor_table_Msg_2eproto_deps, 1, 0,
   schemas, file_default_instances, TableStruct_Msg_2eproto::offsets,
   file_level_metadata_Msg_2eproto, 1, file_level_enum_descriptors_Msg_2eproto, file_level_service_descriptors_Msg_2eproto,
@@ -107,9 +105,6 @@ class Msg::_Internal {
   static void set_has_amt(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
-  static void set_has_ir(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
 };
 
 Msg::Msg()
@@ -123,15 +118,15 @@ Msg::Msg(const Msg& from)
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   ::memcpy(&type_, &from.type_,
-    static_cast<size_t>(reinterpret_cast<char*>(&ir_) -
-    reinterpret_cast<char*>(&type_)) + sizeof(ir_));
+    static_cast<size_t>(reinterpret_cast<char*>(&amt_) -
+    reinterpret_cast<char*>(&type_)) + sizeof(amt_));
   // @@protoc_insertion_point(copy_constructor:Msg)
 }
 
 void Msg::SharedCtor() {
   ::memset(&type_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&ir_) -
-      reinterpret_cast<char*>(&type_)) + sizeof(ir_));
+      reinterpret_cast<char*>(&amt_) -
+      reinterpret_cast<char*>(&type_)) + sizeof(amt_));
 }
 
 Msg::~Msg() {
@@ -158,10 +153,10 @@ void Msg::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
+  if (cached_has_bits & 0x0000001fu) {
     ::memset(&type_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&ir_) -
-        reinterpret_cast<char*>(&type_)) + sizeof(ir_));
+        reinterpret_cast<char*>(&amt_) -
+        reinterpret_cast<char*>(&type_)) + sizeof(amt_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
@@ -212,14 +207,6 @@ const char* Msg::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::intern
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           _Internal::set_has_amt(&has_bits);
           amt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional uint32 IR = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
-          _Internal::set_has_ir(&has_bits);
-          ir_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -281,12 +268,6 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(5, this->_internal_amt(), target);
   }
 
-  // optional uint32 IR = 6;
-  if (cached_has_bits & 0x00000020u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(6, this->_internal_ir(), target);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields(), target, stream);
@@ -310,7 +291,7 @@ size_t Msg::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000003eu) {
+  if (cached_has_bits & 0x0000001eu) {
     // optional uint32 clock = 2;
     if (cached_has_bits & 0x00000002u) {
       total_size += 1 +
@@ -337,13 +318,6 @@ size_t Msg::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
           this->_internal_amt());
-    }
-
-    // optional uint32 IR = 6;
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-          this->_internal_ir());
     }
 
   }
@@ -379,7 +353,7 @@ void Msg::MergeFrom(const Msg& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
+  if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
       type_ = from.type_;
     }
@@ -394,9 +368,6 @@ void Msg::MergeFrom(const Msg& from) {
     }
     if (cached_has_bits & 0x00000010u) {
       amt_ = from.amt_;
-    }
-    if (cached_has_bits & 0x00000020u) {
-      ir_ = from.ir_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -430,7 +401,6 @@ void Msg::InternalSwap(Msg* other) {
   swap(pid_, other->pid_);
   swap(dst_, other->dst_);
   swap(amt_, other->amt_);
-  swap(ir_, other->ir_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Msg::GetMetadata() const {

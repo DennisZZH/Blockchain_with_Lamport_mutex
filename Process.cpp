@@ -9,6 +9,7 @@
 #include <netdb.h> 
 #include <errno.h>
 #include <pthread.h>
+#include <list>
 
 #include "Msg.pb.h"
 
@@ -18,99 +19,214 @@ char* server_ip = "127.0.0.1";
 int myport;
 int sockfd;
 
-std::queue<Msg> events;  // Share resource, protected
-std::vector<Msg> clocks;
-u_int cur_clock = 0;
-u_int mypid;
+std::queue<Msg> events;
+std::list<Msg> requests;
+std::list<Msg> blockchain;
+u_int32_t cur_clock = 0;
+u_int32_t mypid;
+int balance = 10;
+int num_reply = 0;
 
 pthread_t comm, proc;
-pthread_mutex_t lock;
+pthread_mutex_t queue_lock, clock_lock;
 
 
-int safe_push(Msg m){
+bool isMePrioty(){
+    // Check if the front of requests is of mypid
+    // STUB
+    return false;
+}
+
+
+int priority_push(Msg m){
     int status = 0;
-    pthread_mutex_lock(&lock);
-    events.push(m);
-    pthread_mutex_unlock(&lock);
+    // push m to requests, sort requests on time stamp
+    // STUB
     return status;
 }
 
+int safe_increment(int time){
+    int status = 0;
+    pthread_mutex_lock(&clock_lock);
+    cur_clock += time;
+    pthread_mutex_unlock(&clock_lock);
+    return status;
+}
+
+int safe_push(Msg m){
+    int status = 0;
+    pthread_mutex_lock(&queue_lock);
+    events.push(m);
+    pthread_mutex_unlock(&queue_lock);
+    return status;
+}
 
 Msg safe_pop(){
     Msg m;
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&queue_lock);
     m = events.front();
     events.pop();
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&queue_lock);
     return m;
 }
 
+void print_balance(){
+    std::cout<<"Process "<<mypid<<" "<<"balance: "<<balance<<std::endl;;
+}
 
-void print_clocks(){
-    std::cout<<"Process "<<mypid<<" "<<"print clock: ";
-    for(auto i = clocks.begin(); i != clocks.end(); i++){
-        std::cout<<i->clock()<<" ";
+void print_blockchain(){
+    std::cout<<"Process "<<mypid<<" "<<"print blockchain: ";
+    for(auto i = blockchain.front(), i != blockchain.end(); i++){
+        std::cout<<"(P"<<i->pid()<<", P"<<i->dst()<<", $"<<i->amt()<<"), ";
     }
     std::cout<<std::endl;
 }
 
-
-
 void *procThread(void* arg) {
-    // Loop to check if the std::queue is empty. If not, pop the event and calculate the new clock value for it and process.
-    Msg m;
+    Msg m, n, temp;
     std::string msg_str;
 
     while(true){
-        if(!events.empty()){
-            //std::cout<<"Before: Size of queue = "<<events.size()<<std::endl;
-            // Pop events
-            m = safe_pop();
-            //std::cout<<"After: Size of queue = "<<events.size()<<std::endl;
-            // if it is local event
-            if(m.type() == 0){
-                //std::cout << "Local event: (\"" << m.text() << "\") of Process " << m.src() << "\n";
-                cur_clock += 1;
-                m.set_clock(cur_clock);
-            }
-            // if it is recv event
-            else if(m.type() == 2){
-                //std::cout << "Receive event: (\"" << m.text() << "\") from Process " << m.src() << "\n";
-                if(m.clock() > cur_clock + 1){
-                    cur_clock = m.clock() + 1;
+        m.Clear();
+        n.Clear();
+        temp.Clear();
+        msg_str.clear();
 
+        if(!events.empty()){
+
+            m = safe_pop();
+
+            if(m.type() == 0){      // Transfer
+               
+                if(balance >= m.amt()){
+                
+                    n.set_type(1);      // Prepare to send requests
+                    safe_increment(1);
+                    n.set_clock(cur_clock);
+                    n.set_pid(mypid);
+                    n.set_IR(0);
+                    n.set_dst(m.dst());
+                    n.set_amt(m.amt());
+                    n.SerializedToString(&msg_str);
+                    if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
+                        std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
+                        exit(0);
+                    }
+                    requests.push_back(n);
                 }else{
-                    cur_clock += 1;
+                    std::cout<<"FAILURE: insufficient balance!"<<endl;
                 }
-                m.set_clock(cur_clock);
+
             }
-            // if it is send event
-            else if(m.type() == 1){
-                //std::cout << "Send event: (\"" << m.text() << "\") to Process " << m.dst() << "\n";
-                cur_clock += 1;
-                m.set_clock(cur_clock);
-                m.SerializeToString(&msg_str);
+        
+            else if(m.type() == 1){     // Request
+                
+                priority_push(m);
+
+                n.set_type(2);          // Prepare to send a reply
+                safe_increment(1);
+                n.set_clock(cur_clock);
+                n.set_dst(m.pid());
+                n.SerializedToString(&msg_str);
                 if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                     std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                     exit(0);
                 }
+
             }
-            // push to clocks queue
-            clocks.push_back(m);
+
+            else if(m.type() == 2){     // Reply
+
+                if(++num_reply < 2){
+                   // wait for more reply
+                }else{
+                    if(isMePrioty()){
+                        temp = requests.pop_front();
+
+                        balance -= temp.amt();
+
+                        n.set_type(3);      // Prepare to send a broadcast
+                        safe_increment(1);
+                        n.set_clock(cur_clock);
+                        n.set_pid(mypid);
+                        n.set_dst(temp.dst());
+                        n.set_amt(temp.amt());
+
+                        blockchain.push_back(n);
+
+                        n.SerializedToString(&msg_str);
+                        if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
+                            std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
+                            exit(0);
+                        }
+
+                        n.Clear();
+                        msg_str.clear();
+                        n.set_type(4);      // Prepare to send releases
+                        safe_increment(1);
+                        n.set_clock(cur_clock);
+                        n.SerializedToString(&msg_str);
+                        if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
+                            std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
+                            exit(0);
+                        }
+
+                    }
+                    num_reply = 0;
+                }
+            }
+
+            else if(m.type() == 3){     // Broadcast
+                blockchain.push_back(m);
+                if(mypid == m.pid()){
+                    balance += m.amt();
+                }
+            }
+
+            else if(m.type() == 4){     // Release
+
+                requests.pop_front();
+
+                if(!requests.empty()){
+
+                    if(requests.front().get_pid() == mypid){
+                        
+                        temp = requests.pop_front();
+
+                        balance -= temp.amt();
+
+                        n.set_type(3);      // Prepare to send a broadcast
+                        safe_increment(1);
+                        n.set_clock(cur_clock);
+                        n.set_pid(mypid);
+                        n.set_dst(temp.dst());
+                        n.set_amt(temp.amt());
+
+                        blockchain.push_back(n);
+
+                        n.SerializedToString(&msg_str);
+                        if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
+                            std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
+                            exit(0);
+                        }
+                    }
+
+                }
+
+            }
+          
         }
     }
 }
 
 
 void *commThread(void* arg) {
-    // Loop to listen and receive from the socket. Add a receive event to the std::queue if received
     char buf[sizeof(Msg)];
     int to_read = sizeof(Msg), siz_read = 0;
     std::string msg_str;
     Msg m;
 
     while(true){
-        // Receive message
         while(to_read != 0){
             siz_read = recv(sockfd, buf, sizeof(Msg), 0);
             if(siz_read < 0){
@@ -122,10 +238,16 @@ void *commThread(void* arg) {
             bzero(buf, sizeof(buf));
         }
 
-        // Cast std::string to Msg
         m.ParseFromString(msg_str);
-        // Add a receive event to std::queue
         safe_push(m);
+        if(m.clock() >= cur_clock){
+            safe_increment(m.clock() + 1);
+        }else{
+            safe_increment(1);
+        }
+
+        m.Clear();
+        msg_str.clear();
         to_read = sizeof(Msg);
     }
 }
@@ -161,61 +283,55 @@ int main() {
     // Open communication thread and processing thread
     pthread_create(&comm, NULL, &commThread, NULL);
     pthread_create(&proc, NULL, &procThread, NULL);
-    if(pthread_mutex_init(&lock, NULL) != 0) { 
-        std::cerr<<"Error: mutex init has failed!"<<std::endl; 
+    if(pthread_mutex_init(&queue_lock, NULL) != 0) { 
+        std::cerr<<"Error: queue lock mutex init has failed!"<<std::endl; 
+        exit(0);
+    }
+    if(pthread_mutex_init(&clock_lock, NULL) != 0) { 
+        std::cerr<<"Error: clock lock mutex init has failed!"<<std::endl; 
         exit(0);
     } 
 
-    // A while loop taking the user input
     int input;
-    std::string txt;
+    uint32_t rid, amt;
     Msg m;
-    u_int pid_dest;
 
     while(input != 3){
         
-        std::cout<<"Choose  0)add local event  1)add send event  2)print clock  3)quit :";
+        std::cout<<"Choose  0)Add transfer event  1)Print balance  2)Print blockchain  3)Quit :";
         std::cin>>input;
         if(std::cin.fail()){
             std::cout<<"Illegal input! Abort."<<std::endl;
             exit(0);
         }
 
-        // If print clocks
-        if(input == 2){
-            print_clocks();
-            continue;
+        if(input == 1){
+            print_balance();
         }
 
-        else if(input == 0 || input == 1){
+        else if(input == 2){
+            print_blockchain();
+        }
 
-            // Keep taking user input, creating events
-            std::cout<<"Input event name/message: ";
-            std::cin>>txt;
+        else if(input == 0){
 
-            // Create Message
-            m.set_type(input);
-            m.set_clock(0); // Default, waiting to be set when being processed
-            m.set_text(txt);
+            std::cout<<"Input recipient PID: ";
+            std::cin>>rid;
 
-            // If input a send event
-            if(input == 1){
-                std::cout<<"Input receiver Process id: ";
-                std::cin>>pid_dest;
-                m.set_dst(pid_dest);
-                m.set_src(mypid);
-            }
+            std::cout<<"Input transfer amount: ";
+            std::cin>>amt;
 
-            // push event to std::queue
+            m.set_type(0);
+            m.set_dst(rid);
+            m.set_amt(amt);
+
             safe_push(m);
+            safe_increment(1);
 
-            // clear buf
             m.Clear();
-            txt.clear();
-
         }
 
-        else if (input != 3) {
+        else{
             std::cout<<"Invalid input! Please input again."<<std::endl;
         }
 
@@ -223,9 +339,7 @@ int main() {
 
     // Kill/Join proc and comm, terminate network
     m.Clear();
-    m.set_type(3);
-    m.set_clock(0);
-    m.set_text("");
+    m.set_type(5);
     send(sockfd, m.SerializeAsString().c_str(), sizeof(m), 0);
 
     pthread_kill(comm,SIGKILL);

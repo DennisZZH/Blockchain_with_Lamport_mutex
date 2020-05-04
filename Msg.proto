@@ -6,5 +6,4 @@ message Msg{
 	optional uint32 pid = 3;
 	optional uint32 dst = 4;
 	optional uint32 amt = 5;
-	optional uint32 IR = 6;
 }

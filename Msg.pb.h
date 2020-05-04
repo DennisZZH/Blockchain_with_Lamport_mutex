@@ -181,7 +181,6 @@ class Msg :
     kPidFieldNumber = 3,
     kDstFieldNumber = 4,
     kAmtFieldNumber = 5,
-    kIRFieldNumber = 6,
   };
   // required uint32 type = 1;
   bool has_type() const;
@@ -248,19 +247,6 @@ class Msg :
   void _internal_set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // optional uint32 IR = 6;
-  bool has_ir() const;
-  private:
-  bool _internal_has_ir() const;
-  public:
-  void clear_ir();
-  ::PROTOBUF_NAMESPACE_ID::uint32 ir() const;
-  void set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_ir() const;
-  void _internal_set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:Msg)
  private:
   class _Internal;
@@ -273,7 +259,6 @@ class Msg :
   ::PROTOBUF_NAMESPACE_ID::uint32 pid_;
   ::PROTOBUF_NAMESPACE_ID::uint32 dst_;
   ::PROTOBUF_NAMESPACE_ID::uint32 amt_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 ir_;
   friend struct ::TableStruct_Msg_2eproto;
 };
 // ===================================================================
@@ -425,34 +410,6 @@ inline void Msg::_internal_set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
 inline void Msg::set_amt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_amt(value);
   // @@protoc_insertion_point(field_set:Msg.amt)
-}
-
-// optional uint32 IR = 6;
-inline bool Msg::_internal_has_ir() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  return value;
-}
-inline bool Msg::has_ir() const {
-  return _internal_has_ir();
-}
-inline void Msg::clear_ir() {
-  ir_ = 0u;
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::_internal_ir() const {
-  return ir_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 Msg::ir() const {
-  // @@protoc_insertion_point(field_get:Msg.IR)
-  return _internal_ir();
-}
-inline void Msg::_internal_set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000020u;
-  ir_ = value;
-}
-inline void Msg::set_ir(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_ir(value);
-  // @@protoc_insertion_point(field_set:Msg.IR)
 }
 
 #ifdef __GNUC__
