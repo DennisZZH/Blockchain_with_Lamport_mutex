@@ -28,8 +28,8 @@ int balance = 10;
 int num_reply = 0;
 
 pthread_t comm, proc;
-pthread_mutex_t queue_lock, clock_lock;
-
+pthread_mutex_t queue_lock, clock_lock, transfer_lock;
+pthread_cond_t cond;
 
 bool isMePrioty(){
     // Check if the front of requests is of mypid
@@ -188,8 +188,6 @@ void *procThread(void* arg) {
                         n.set_pid(mypid);
                         n.set_dst(temp.dst());
                         n.set_amt(temp.amt());
-
-                        //std::cout<<"111 adding transaction!"<<std::endl;
                         blockchain.push_back(n);
 
                         n.SerializeToString(&msg_str);
@@ -210,7 +208,7 @@ void *procThread(void* arg) {
                         }
 
                         // revoke main thread
-                        // STUB
+                        // pthread_cond_signal(&cond);
 
                     }
                     num_reply = 0;
@@ -219,8 +217,6 @@ void *procThread(void* arg) {
 
             else if(m.type() == 3){     // Broadcast
             //std::cout<<"Recving a Broadcast from p"<<m.pid()<<std::endl;
-
-              //std::cout<<"222 adding transaction!"<<std::endl;
 
                 blockchain.push_back(m);
                 if(mypid == m.dst()){
@@ -250,7 +246,6 @@ void *procThread(void* arg) {
                         n.set_dst(temp.dst());
                         n.set_amt(temp.amt());
 
-                        //std::cout<<"333 adding transaction!"<<std::endl;
                         blockchain.push_back(n);
 
                         n.SerializeToString(&msg_str);
@@ -271,7 +266,7 @@ void *procThread(void* arg) {
                         }
 
                          // revoke main thread
-                         // STUB
+                         //pthread_cond_signal(&cond);
 
                     }
 
@@ -354,6 +349,10 @@ int main() {
     if(pthread_mutex_init(&clock_lock, NULL) != 0) { 
         std::cerr<<"Error: clock lock mutex init has failed!"<<std::endl; 
         exit(0);
+    }
+    if(pthread_mutex_init(&transfer_lock, NULL) != 0) { 
+        std::cerr<<"Error: clock lock mutex init has failed!"<<std::endl; 
+        exit(0);
     } 
 
     int input;
@@ -379,6 +378,9 @@ int main() {
 
         else if(input == 0){
 
+            // Allow one transfer-release at a time
+            // pthread_mutex_lock(&transfer_lock);
+
             std::cout<<"Input recipient PID: ";
             std::cin>>rid;
 
@@ -401,7 +403,8 @@ int main() {
             m.Clear();
 
             // conditional wait for signal from release
-            // STUB
+            // pthread_cond_wait(&cond, &transfer_lock);
+            // pthread_mutex_unlock(&transfer_lock);
         }
 
         else{
