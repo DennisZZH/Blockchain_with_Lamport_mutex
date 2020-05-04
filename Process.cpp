@@ -31,10 +31,9 @@ pthread_t comm, proc;
 pthread_mutex_t queue_lock, clock_lock;
 
 
-bool isMePrioty(int mypid){
+bool isMePrioty(){
     // Check if the front of requests is of mypid
-    Msg m = requests[0];
-    if (m.pid() == mypid) {
+    if (requests.front().pid() == mypid) {
         return true;
     }
     else {
@@ -43,7 +42,7 @@ bool isMePrioty(int mypid){
 }
 
 bool compare(Msg newM, Msg target) {
-    if (newM.clock() < target.clock) {
+    if (newM.clock() < target.clock()) {
         return true;
     }
     else if (newM.clock() == target.clock()) {
@@ -56,15 +55,17 @@ bool compare(Msg newM, Msg target) {
 
 int priority_push(Msg m){
     int status = 0;
+    std::list<Msg>::iterator it;
     // push m to requests, sort requests on time stamp
     if (requests.empty()) { // Empty list
         requests.push_back(m);
     }
     else {
-        for (std::list<Msg>::iterator it = requests.begin(); it != requests.end(); ++it) {
-            if (compare(m, requests[i])) { 
+        for (it = requests.begin(); it != requests.end(); ++it) {
+            if (compare(m, *it)) { 
                 // Insert
                 requests.insert(it, m);
+                break;
             }
         }
         if (it == requests.end()) {
@@ -106,7 +107,7 @@ void print_balance(){
 
 void print_blockchain(){
     std::cout<<"Process "<<mypid<<" "<<"print blockchain: ";
-    for(auto i = blockchain.front(), i != blockchain.end(); i++){
+    for(auto i = blockchain.begin(); i != blockchain.end(); i++){
         std::cout<<"(P"<<i->pid()<<", P"<<i->dst()<<", $"<<i->amt()<<"), ";
     }
     std::cout<<std::endl;
@@ -127,6 +128,8 @@ void *procThread(void* arg) {
             m = safe_pop();
 
             if(m.type() == 0){      // Transfer
+
+                std::cout<<"Recving a Local Transfer"<<std::endl;
                
                 if(balance >= m.amt()){
                 
@@ -134,22 +137,23 @@ void *procThread(void* arg) {
                     safe_increment(1);
                     n.set_clock(cur_clock);
                     n.set_pid(mypid);
-                    n.set_IR(0);
                     n.set_dst(m.dst());
                     n.set_amt(m.amt());
-                    n.SerializedToString(&msg_str);
+                    n.SerializeToString(&msg_str);
                     if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                         std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                         exit(0);
                     }
                     priority_push(n);
                 }else{
-                    std::cout<<"FAILURE: insufficient balance!"<<endl;
+                    std::cout<<"FAILURE: insufficient balance!"<<std::endl;
                 }
 
             }
         
             else if(m.type() == 1){     // Request
+
+                std::cout<<"Recving a Request from p"<<m.pid()<<std::endl;
                 
                 priority_push(m);
 
@@ -157,7 +161,7 @@ void *procThread(void* arg) {
                 safe_increment(1);
                 n.set_clock(cur_clock);
                 n.set_dst(m.pid());
-                n.SerializedToString(&msg_str);
+                n.SerializeToString(&msg_str);
                 if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                     std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                     exit(0);
@@ -167,12 +171,14 @@ void *procThread(void* arg) {
 
             else if(m.type() == 2){     // Reply
 
+                std::cout<<"Recving a Reply"<<std::endl;
+
                 if(++num_reply < 2){
-                   // wait for more reply
-                   continue;
+                  
                 }else{
-                    if(isMePrioty(mypid)){
-                        temp = requests.pop_front();
+                    if(isMePrioty()){
+                        temp = requests.front();
+                        requests.pop_front();
 
                         balance -= temp.amt();
 
@@ -183,9 +189,10 @@ void *procThread(void* arg) {
                         n.set_dst(temp.dst());
                         n.set_amt(temp.amt());
 
+                        std::cout<<"111 adding transaction!"<<std::endl;
                         blockchain.push_back(n);
 
-                        n.SerializedToString(&msg_str);
+                        n.SerializeToString(&msg_str);
                         if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                             std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                             exit(0);
@@ -196,7 +203,7 @@ void *procThread(void* arg) {
                         n.set_type(4);      // Prepare to send releases
                         safe_increment(1);
                         n.set_clock(cur_clock);
-                        n.SerializedToString(&msg_str);
+                        n.SerializeToString(&msg_str);
                         if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                             std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                             exit(0);
@@ -208,6 +215,10 @@ void *procThread(void* arg) {
             }
 
             else if(m.type() == 3){     // Broadcast
+            std::cout<<"Recving a Broadcast from p"<<m.pid()<<std::endl;
+
+              std::cout<<"222 adding transaction!"<<std::endl;
+
                 blockchain.push_back(m);
                 if(mypid == m.dst()){
                     balance += m.amt();
@@ -216,13 +227,16 @@ void *procThread(void* arg) {
 
             else if(m.type() == 4){     // Release
 
+                std::cout<<"Recving a Release"<<std::endl;
+
                 requests.pop_front();
 
                 if(!requests.empty()){
 
-                    if(requests.front().get_pid() == mypid){
+                    if(requests.front().pid() == mypid){
                         
-                        temp = requests.pop_front();
+                        temp = requests.front();
+                        requests.pop_front();
 
                         balance -= temp.amt();
 
@@ -233,9 +247,10 @@ void *procThread(void* arg) {
                         n.set_dst(temp.dst());
                         n.set_amt(temp.amt());
 
+                        std::cout<<"333 adding transaction!"<<std::endl;
                         blockchain.push_back(n);
 
-                        n.SerializedToString(&msg_str);
+                        n.SerializeToString(&msg_str);
                         if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                             std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                             exit(0);
@@ -246,7 +261,7 @@ void *procThread(void* arg) {
                         n.set_type(4);      // Prepare to send releases
                         safe_increment(1);
                         n.set_clock(cur_clock);
-                        n.SerializedToString(&msg_str);
+                        n.SerializeToString(&msg_str);
                         if(send(sockfd, msg_str.c_str(), sizeof(Msg), 0) < 0){
                             std::cerr<<"Error: procThread failed to send the message!"<<std::endl;
                             exit(0);

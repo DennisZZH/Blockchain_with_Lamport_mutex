@@ -78,9 +78,11 @@ void *manageProcesses(void* args) {
             else if (m.type() == 4) messageType = "RELEASE";
             std::cout << "Wait and send " << messageType << " from P" << procNum << "\n";
 
+            sleep(1);
+
             // Broadcast the message
             for (int i = 0; i < 3; i++) {
-                if (procNum == (i + 1)) {
+                if (procNum == i) {
                     // Don't broadcast to itself
                     continue;
                 }
