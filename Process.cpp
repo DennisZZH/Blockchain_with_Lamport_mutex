@@ -390,6 +390,7 @@ int main() {
             if(amt > balance){
                 std::cout<<"FAILURE: insufficient balance!"<<std::endl;
                 safe_increment(1);
+                pthread_mutex_unlock(&transfer_lock);
                 continue;
             }
 
